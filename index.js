@@ -1,41 +1,33 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+app.use(cors());
+app.use(express.json());
 
 // Conexión a la base de datos MongoDB
 mongoose.connect('mongodb://127.0.0.1:27017/miBaseDeDatos', { useNewUrlParser: true, useUnifiedTopology: true });
 
-/* Definir un modelo simple
-const Schema = mongoose.Schema;
-const ejemploSchema = new Schema({
-    mensaje: String,
-});*/
 
-//const Ejemplo = mongoose.model('Ejemplo', ejemploSchema);
 
-/* Rutas
-app.get('/api/usuarios', async (req, res) => {
-    const usuarios = await Ejemplo.find();
-    res.json(usuarios);
-});*/
-
-// Iniciar el servidor
-app.listen(PORT, () => {
-    console.log(`Servidor backend en http://localhost:${PORT}`);
-});
-
-const cors = require('cors');
-
-app.use(cors());
-
-const usuarioSchema = new Schema({
+const usuarioSchema = new mongoose.Schema({
     username: String,
     password: String,
 });
 
 const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+app.get('/api/usuarios', async (req, res) => {
+    try {
+      const usuarios = await Usuario.find();
+      res.json(usuarios);
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
 
 // Ruta para crear un nuevo usuario
 app.post('/api/usuarios', async (req, res) => {
@@ -54,17 +46,7 @@ app.post('/api/usuarios', async (req, res) => {
     }
 });
 
-
-/* Ruta para crear un nuevo mensaje
-app.post('/api/mensajes', async (req, res) => {
-    const { mensaje } = req.body;
-
-    try {
-        const nuevoMensaje = new Ejemplo({ mensaje });
-        await nuevoMensaje.save();
-        res.json({ mensaje: 'Mensaje creado con éxito' });
-    } catch (error) {
-        console.error('Error al crear mensaje:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
-    }
-});*/
+// Iniciar el servidor
+app.listen(PORT, () => {
+    console.log(`Servidor backend en http://localhost:${PORT}`);
+});
